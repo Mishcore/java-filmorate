@@ -6,7 +6,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class FilmReleaseDateValidator implements ConstraintValidator<ValidReleaseDate, LocalDate> {
-    private String earliestDate;
+    private static String earliestDate;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     @Override
     public void initialize(ValidReleaseDate constraintAnnotation) {
@@ -19,8 +20,7 @@ public class FilmReleaseDateValidator implements ConstraintValidator<ValidReleas
         if (value == null) {
             return false;
         }
-        return (!value.isBefore(LocalDate.parse(earliestDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")))
-                && !value.isAfter(LocalDate.now()));
+        return !value.isBefore(LocalDate.parse(earliestDate, formatter));
     }
 
 }

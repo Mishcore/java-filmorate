@@ -15,10 +15,10 @@ public class Film {
     @NotBlank
     private String name;
 
+    @NotNull
     @Size(max = 200)
     private String description;
 
-    @NotNull
     @ValidReleaseDate(earliestDate = CINEMA_BIRTH_DATE)
     private LocalDate releaseDate;
 

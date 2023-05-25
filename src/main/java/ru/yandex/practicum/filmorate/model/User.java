@@ -11,7 +11,7 @@ public class User {
     @Positive
     private Integer id;
 
-    @NotNull
+    @NotEmpty
     @Email
     private String email;
 
@@ -21,17 +21,14 @@ public class User {
 
     private String name;
 
+    @NotNull
     @PastOrPresent
     private LocalDate birthday;
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
-        if (name == null || name.isEmpty()) {
-            this.name = login;
-        } else {
-            this.name = name;
-        }
+        this.name = name;
         this.birthday = birthday;
     }
 }
