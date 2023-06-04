@@ -10,18 +10,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
 
-    private static int id = 0;
+    private int id = 0;
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
     public List<User> getAllUsers() {
-        log.info("User list requested");
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public User getUser(int id) {
+        validateUserId(id);
+        return users.get(id);
+    }
+
+    @Override
+    public List<User> getFriends(int id) {
+        return users.get(id).getFriends().stream()
+                .map(users::get)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -39,10 +52,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn("Invalid user (request body has no user id)");
             throw new EntityValidationException("Invalid user (request body has no user id)");
         }
-        if (!users.containsKey(user.getId())) {
-            log.warn("User not found");
-            throw new EntityNotFoundException(User.class.getSimpleName());
-        }
+        validateUserId(user.getId());
         setEmptyNameAsLogin(user);
         users.replace(user.getId(), user);
         log.info("User updated");
@@ -51,10 +61,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(int userId) {
-        if (!users.containsKey(userId)) {
-            log.warn("User not found");
-            throw new EntityNotFoundException(User.class.getSimpleName());
-        }
+        validateUserId(userId);
         users.remove(userId);
         log.info("User deleted");
     }
@@ -62,6 +69,17 @@ public class InMemoryUserStorage implements UserStorage {
     private void setEmptyNameAsLogin(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private void validateUserId(Integer userId) {
+        if (userId == null || userId < 0) {
+            log.warn("Invalid user ID");
+            throw new EntityNotFoundException("Invalid user ID");
+        }
+        if (!users.containsKey(userId)) {
+            log.warn("User not found");
+            throw new EntityNotFoundException("User not found");
         }
     }
 }
