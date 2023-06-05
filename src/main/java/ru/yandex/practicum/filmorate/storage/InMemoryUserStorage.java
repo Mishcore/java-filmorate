@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exception.EntityValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -48,10 +47,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        if (user.getId() == null) {
-            log.warn("Invalid user (request body has no user id)");
-            throw new EntityValidationException("Invalid user (request body has no user id)");
-        }
         validateUserId(user.getId());
         setEmptyNameAsLogin(user);
         users.replace(user.getId(), user);
@@ -72,8 +67,8 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private void validateUserId(Integer userId) {
-        if (userId == null || userId < 0) {
+    private void validateUserId(int userId) {
+        if (userId <= 0) {
             log.warn("Invalid user ID");
             throw new EntityNotFoundException("Invalid user ID");
         }

@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exception.EntityValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
@@ -20,8 +19,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        log.info("Film list requested");
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Film getFilm(int id) {
+        validateFilmId(id);
+        return films.get(id);
     }
 
     @Override
@@ -34,26 +38,27 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        if (film.getId() == null) {
-            log.warn("Invalid film (request body has no film id)");
-            throw new EntityValidationException("Invalid film (request body has no film id)");
-        }
-        if (!films.containsKey(film.getId())) {
-            log.warn("Film not found");
-            throw new EntityNotFoundException(Film.class.getSimpleName());
-        }
+        validateFilmId(film.getId());
         films.replace(film.getId(), film);
         log.info("Film info updated");
         return film;
     }
 
     @Override
-    public void deleteFilm(int filmId) {
+    public void deleteFilm(int id) {
+        validateFilmId(id);
+        films.remove(id);
+        log.info("Film deleted");
+    }
+
+    private void validateFilmId(int filmId) {
+        if (filmId <= 0) {
+            log.warn("Invalid film ID");
+            throw new EntityNotFoundException("Invalid film ID");
+        }
         if (!films.containsKey(filmId)) {
             log.warn("Film not found");
-            throw new EntityNotFoundException(Film.class.getSimpleName());
+            throw new EntityNotFoundException("Film not found");
         }
-        films.remove(filmId);
-        log.info("Film deleted");
     }
 }

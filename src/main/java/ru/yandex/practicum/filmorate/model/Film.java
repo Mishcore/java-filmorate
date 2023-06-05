@@ -2,15 +2,20 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.ValidReleaseDate;
-import javax.validation.constraints.*;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
     private static final String CINEMA_BIRTH_DATE = "28.12.1895";
 
-    @Positive
-    private Integer id;
+    private int id;
 
     @NotBlank
     private String name;
@@ -25,10 +30,13 @@ public class Film {
     @Positive
     private int duration;
 
+    private final Set<Integer> likers;
+
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.likers = new HashSet<>();
     }
 }
