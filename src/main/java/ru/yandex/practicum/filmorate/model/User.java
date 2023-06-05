@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -10,10 +11,9 @@ import java.util.Set;
 public class User {
     private static final String LOGIN_PATTERN = "^\\S+$";
 
-    @Positive
     private int id;
 
-    @NotEmpty
+    @NotBlank
     @Email
     private String email;
 

@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -17,8 +16,8 @@ public class UserService {
     private final UserStorage userStorage;
 
     public void addFriend(int followerId, int followedId) {
-        User follower = getUserOrThrowException(followerId);
-        User followed = getUserOrThrowException(followedId);
+        User follower = userStorage.getUser(followerId);
+        User followed = userStorage.getUser(followedId);
 
         follower.getFriends().add(followedId);
         log.info("User " + follower.getName() + " wants to be friends with User" + followed.getName());
@@ -27,8 +26,8 @@ public class UserService {
     }
 
     public void deleteFriend(int followerId, int followedId) {
-        User follower = getUserOrThrowException(followerId);
-        User followed = getUserOrThrowException(followedId);
+        User follower = userStorage.getUser(followerId);
+        User followed = userStorage.getUser(followedId);
 
         follower.getFriends().remove(followedId);
         followed.getFriends().remove(followerId);
@@ -36,9 +35,10 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int user1Id, int user2Id) {
-        User user1 = getUserOrThrowException(user1Id);
-        User user2 = getUserOrThrowException(user2Id);
+        User user1 = userStorage.getUser(user1Id);
+        User user2 = userStorage.getUser(user2Id);
 
+        log.info("Common friends of users " + user1.getName() + " and " + user2.getName() + " requested");
         return user1.getFriends().stream()
                 .filter(friendId -> user1.getFriends().contains(friendId) && user2.getFriends().contains(friendId))
                 .map(userStorage::getUser)
@@ -67,18 +67,5 @@ public class UserService {
 
     public void deleteUser(int id) {
         userStorage.deleteUser(id);
-    }
-
-    private User getUserOrThrowException(int userId) {
-        if (userId <= 0) {
-            log.warn("Invalid user ID");
-            throw new EntityNotFoundException("Invalid user ID");
-        }
-        User user = userStorage.getUser(userId);
-        if (user == null) {
-            log.warn("User not found");
-            throw new EntityNotFoundException("User not found");
-        }
-        return user;
     }
 }
