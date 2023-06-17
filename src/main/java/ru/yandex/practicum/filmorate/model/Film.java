@@ -30,7 +30,7 @@ public class Film {
     @Positive
     private int duration;
 
-    private final Set<User> likers;
+    private final Set<Long> likers;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;

@@ -20,13 +20,13 @@ public class FilmService {
     private final UserStorage userStorage;
     private final Set<Film> sortedFilms = new TreeSet<>(FilmService::compareByLikes);
 
-    public void addLike(int id, int userId) {
-        filmStorage.getFilm(id).getLikers().add(userStorage.getUser(userId));
+    public void addLike(int id, long userId) {
+        filmStorage.getFilm(id).getLikers().add(userStorage.getUser(userId).getId());
         log.info("Like has been added");
     }
 
-    public void deleteLike(int id, int userId) {
-        filmStorage.getFilm(id).getLikers().remove(userStorage.getUser(userId));
+    public void deleteLike(int id, long userId) {
+        filmStorage.getFilm(id).getLikers().remove(userStorage.getUser(userId).getId());
         log.info("Like has been deleted");
     }
 

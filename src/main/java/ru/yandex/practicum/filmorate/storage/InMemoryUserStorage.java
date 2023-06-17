@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
 
-    private int id = 0;
-    private final Map<Integer, User> users = new HashMap<>();
+    private long id = 0;
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public List<User> getAllUsers() {
@@ -24,13 +24,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(int id) {
+    public User getUser(long id) {
         validateUserId(id);
         return users.get(id);
     }
 
     @Override
-    public List<User> getFriends(int id) {
+    public List<User> getFriends(long id) {
         return users.get(id).getFriends().stream()
                 .map(users::get)
                 .collect(Collectors.toList());
@@ -55,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(int userId) {
+    public void deleteUser(long userId) {
         validateUserId(userId);
         users.remove(userId);
         log.info("User deleted");
@@ -67,7 +67,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private void validateUserId(int userId) {
+    private void validateUserId(long userId) {
         if (userId <= 0) {
             log.warn("Invalid user ID");
             throw new EntityNotFoundException("Invalid user ID");

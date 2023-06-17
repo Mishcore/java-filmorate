@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
 
-    public void addFriend(int followerId, int followedId) {
+    public void addFriend(long followerId, long followedId) {
         User follower = userStorage.getUser(followerId);
         User followed = userStorage.getUser(followedId);
 
@@ -25,7 +25,7 @@ public class UserService {
         log.info("User " + follower.getName() + " and User " + followed.getName() + " become friends!");
     }
 
-    public void deleteFriend(int followerId, int followedId) {
+    public void deleteFriend(long followerId, long followedId) {
         User follower = userStorage.getUser(followerId);
         User followed = userStorage.getUser(followedId);
 
@@ -34,7 +34,7 @@ public class UserService {
         log.info("User " + follower.getName() + " and User " + followed.getName() + " are no longer friends");
     }
 
-    public List<User> getCommonFriends(int user1Id, int user2Id) {
+    public List<User> getCommonFriends(long user1Id, long user2Id) {
         User user1 = userStorage.getUser(user1Id);
         User user2 = userStorage.getUser(user2Id);
 
@@ -49,11 +49,11 @@ public class UserService {
         return userStorage.getAllUsers();
     }
 
-    public User getUser(int id) {
+    public User getUser(long id) {
         return userStorage.getUser(id);
     }
 
-    public List<User> getFriends(int id) {
+    public List<User> getFriends(long id) {
         return userStorage.getFriends(id);
     }
 
@@ -65,7 +65,7 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
-    public void deleteUser(int id) {
+    public void deleteUser(long id) {
         userStorage.deleteUser(id);
     }
 }
