@@ -27,6 +27,8 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;
 
+    private final Set<Long> followees;
+
     private final Set<Long> friends;
 
     public User(String email, String login, String name, LocalDate birthday) {
@@ -34,6 +36,7 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+        this.followees = new HashSet<>();
         this.friends = new HashSet<>();
     }
 }

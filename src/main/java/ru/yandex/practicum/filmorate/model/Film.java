@@ -30,13 +30,19 @@ public class Film {
     @Positive
     private int duration;
 
+    private final Set<Genre> genres;
+
+    private MpaRating mpaRating;
+
     private final Set<Long> likers;
 
-    public Film(String name, String description, LocalDate releaseDate, int duration) {
+    public Film(String name, String description, LocalDate releaseDate, int duration, MpaRating mpaRating) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.genres = new HashSet<>();
+        this.mpaRating = mpaRating;
         this.likers = new HashSet<>();
     }
 }
