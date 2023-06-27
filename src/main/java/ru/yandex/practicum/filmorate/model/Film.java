@@ -30,9 +30,10 @@ public class Film {
     @Positive
     private int duration;
 
+    private MpaRating mpaRating;
+
     private final Set<Genre> genres;
 
-    private MpaRating mpaRating;
 
     private final Set<Long> likers;
 
@@ -41,8 +42,8 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.genres = new HashSet<>();
         this.mpaRating = mpaRating;
+        this.genres = new HashSet<>();
         this.likers = new HashSet<>();
     }
 }
