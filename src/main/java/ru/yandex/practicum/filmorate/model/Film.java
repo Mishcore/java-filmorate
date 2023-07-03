@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.ValidReleaseDate;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 public class Film {
@@ -30,20 +29,34 @@ public class Film {
     @Positive
     private int duration;
 
-    private MpaRating mpaRating;
+    @PositiveOrZero
+    private int rate;
+
+    private MpaRating mpa;
 
     private final Set<Genre> genres;
 
-
-    private final Set<Long> likers;
-
-    public Film(String name, String description, LocalDate releaseDate, int duration, MpaRating mpaRating) {
+    public Film(String name, String description, LocalDate releaseDate, int duration, int rate, MpaRating mpa) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.mpaRating = mpaRating;
-        this.genres = new HashSet<>();
-        this.likers = new HashSet<>();
+        this.rate = rate;
+        this.mpa = mpa;
+        this.genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+    }
+
+    @JsonSetter
+    public void setGenres(Set<Genre> genres) {
+        this.genres.clear();
+        this.genres.addAll(genres);
+    }
+
+    public void addLike() {
+        rate++;
+    }
+
+    public void deleteLike() {
+        rate--;
     }
 }

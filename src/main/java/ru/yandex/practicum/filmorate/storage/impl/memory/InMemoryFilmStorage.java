@@ -6,10 +6,8 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -50,6 +48,14 @@ public class InMemoryFilmStorage implements FilmStorage {
         validateFilmId(id);
         films.remove(id);
         log.info("Film deleted");
+    }
+
+    @Override
+    public List<Film> getPopular(int count) {
+        return films.values().stream()
+                .sorted(Comparator.comparingInt(Film::getRate))
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private void validateFilmId(int filmId) {

@@ -41,9 +41,6 @@ public class MpaDbStorage implements MpaStorage {
     }
 
     private RowMapper<MpaRating> mpaRowMapper() {
-        return (rs, rowNum) -> new MpaRating(
-                rs.getByte("id"),
-                rs.getString("name")
-        );
+        return (rs, rowNum) -> new MpaRating(rs.getByte("id"), rs.getString("name"));
     }
 }
