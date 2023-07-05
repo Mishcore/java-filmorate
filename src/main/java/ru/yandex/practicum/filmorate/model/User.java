@@ -27,8 +27,6 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;
 
-    private final Set<Long> followees;
-
     private final Set<Long> friends;
 
     private final Set<Integer> likedFilms;
@@ -38,7 +36,6 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-        this.followees = new HashSet<>();
         this.friends = new HashSet<>();
         this.likedFilms = new HashSet<>();
     }

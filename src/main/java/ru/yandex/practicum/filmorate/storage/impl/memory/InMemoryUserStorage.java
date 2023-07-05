@@ -62,6 +62,21 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("User deleted");
     }
 
+    @Override
+    public void addFriend(long userId, long friendId) {
+
+    }
+
+    @Override
+    public void deleteFriend(long userId, long friendId) {
+
+    }
+
+    @Override
+    public List<User> getCommonFriends(long user1Id, long user2Id) {
+        return null;
+    }
+
     private void setEmptyNameAsLogin(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());

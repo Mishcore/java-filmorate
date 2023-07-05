@@ -58,6 +58,16 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void addLike(int filmId, long userId) {
+
+    }
+
+    @Override
+    public void deleteLike(int filmId, long userId) {
+
+    }
+
     private void validateFilmId(int filmId) {
         if (filmId <= 0) {
             throw new EntityNotFoundException("Invalid film ID");

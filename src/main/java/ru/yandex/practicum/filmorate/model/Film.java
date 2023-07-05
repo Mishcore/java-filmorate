@@ -51,12 +51,4 @@ public class Film {
         this.genres.clear();
         this.genres.addAll(genres);
     }
-
-    public void addLike() {
-        rate++;
-    }
-
-    public void deleteLike() {
-        rate--;
-    }
 }

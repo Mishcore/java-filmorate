@@ -40,9 +40,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(int id) {
-        if (id <= 0) {
-            throw new EntityNotFoundException("Invalid Film ID");
-        }
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
                 " FROM films AS f" +
@@ -98,7 +95,8 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDuration(),
                 film.getRate(),
                 film.getMpa().getId(),
-                film.getId()) == 0) {
+                film.getId()
+                ) == 0) {
             throw new EntityNotFoundException("Film not found");
         }
 
@@ -131,6 +129,41 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    @Override
+    public List<Film> getPopular(int count) {
+        String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
+                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
+                " FROM films AS f" +
+                " JOIN mpa_ratings AS mpa ON f.mpa_rating_id = mpa.id" +
+                " LEFT JOIN film_genres AS fg ON f.id = fg.film_id" +
+                " LEFT JOIN genres AS g ON fg.genre_id = g.id" +
+                " GROUP BY f.id" +
+                " ORDER BY f.rate DESC" +
+                " LIMIT ?";
+
+        return jdbcTemplate.query(sqlQuery, filmRowMapper(), count);
+    }
+
+    @Override
+    public void addLike(int filmId, long userId) {
+        String sqlQuery = "INSERT INTO film_likes VALUES (?, ?);" +
+                " UPDATE films SET rate = rate + 1 WHERE id = ?";
+
+        if (jdbcTemplate.update(sqlQuery, filmId, userId, filmId) == 0) {
+            throw new EntityNotFoundException("Film or User not found");
+        }
+    }
+
+    @Override
+    public void deleteLike(int filmId, long userId) {
+        String sqlQuery = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?;" +
+                "UPDATE films SET rate = rate - 1 WHERE id = ?";
+
+        if (jdbcTemplate.update(sqlQuery, filmId, userId, filmId) == 0) {
+            throw new EntityNotFoundException("Film or User not found");
+        }
+    }
+
     private RowMapper<Film> filmRowMapper() {
         return (rs, rowNum) -> {
             Film film = new Film(
@@ -153,21 +186,6 @@ public class FilmDbStorage implements FilmStorage {
             }
             return film;
         };
-    }
-
-    @Override
-    public List<Film> getPopular(int count) {
-        String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
-                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
-                " FROM films AS f" +
-                " JOIN mpa_ratings AS mpa ON f.mpa_rating_id = mpa.id" +
-                " LEFT JOIN film_genres AS fg ON f.id = fg.film_id" +
-                " LEFT JOIN genres AS g ON fg.genre_id = g.id" +
-                " GROUP BY f.id" +
-                " ORDER BY f.rate DESC" +
-                " LIMIT ?";
-
-        return jdbcTemplate.query(sqlQuery, filmRowMapper(), count);
     }
 
     private Map<String, Object> filmToMap(Film film) {

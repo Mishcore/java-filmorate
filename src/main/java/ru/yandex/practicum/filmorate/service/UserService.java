@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,34 +15,25 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
 
-    public void addFriend(long followerId, long followedId) {
-        User follower = userStorage.getUser(followerId);
-        User followed = userStorage.getUser(followedId);
-
-        follower.getFriends().add(followedId);
-        log.info("User " + follower.getName() + " wants to be friends with User" + followed.getName());
-        followed.getFriends().add(followerId);
-        log.info("User " + follower.getName() + " and User " + followed.getName() + " become friends!");
+    public void addFriend(long userId, long friendId) {
+        if (userId <= 0 || friendId <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
+        userStorage.addFriend(userId, friendId);
     }
 
-    public void deleteFriend(long followerId, long followedId) {
-        User follower = userStorage.getUser(followerId);
-        User followed = userStorage.getUser(followedId);
-
-        follower.getFriends().remove(followedId);
-        followed.getFriends().remove(followerId);
-        log.info("User " + follower.getName() + " and User " + followed.getName() + " are no longer friends");
+    public void deleteFriend(long userId, long friendId) {
+        if (userId <= 0 || friendId <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
+        userStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(long user1Id, long user2Id) {
-        User user1 = userStorage.getUser(user1Id);
-        User user2 = userStorage.getUser(user2Id);
-
-        log.info("Common friends of users " + user1.getName() + " and " + user2.getName() + " requested");
-        return user1.getFriends().stream()
-                .filter(friendId -> user1.getFriends().contains(friendId) && user2.getFriends().contains(friendId))
-                .map(userStorage::getUser)
-                .collect(Collectors.toList());
+        if (user1Id <= 0 || user2Id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
+        return userStorage.getCommonFriends(user1Id, user2Id);
     }
 
     public List<User> getAllUsers() {
@@ -50,22 +41,39 @@ public class UserService {
     }
 
     public User getUser(long id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
         return userStorage.getUser(id);
     }
 
     public List<User> getFriends(long id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
         return userStorage.getFriends(id);
     }
 
     public User addUser(User user) {
+        setEmptyNameAsLogin(user);
         return userStorage.addUser(user);
     }
 
     public User updateUser(User user) {
+        setEmptyNameAsLogin(user);
         return userStorage.updateUser(user);
     }
 
     public void deleteUser(long id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
         userStorage.deleteUser(id);
+    }
+
+    private void setEmptyNameAsLogin(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }
