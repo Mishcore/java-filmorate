@@ -91,11 +91,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteUser(long userId) {
         String sqlQuery = "DELETE FROM users WHERE id = ?;" +
-                " DELETE FROM user_likes WHERE user_id = ?;" +
-                " DELETE FROM user_followees WHERE user_id = ?;" +
+                " DELETE FROM film_likes WHERE user_id = ?;" +
                 " DELETE FROM user_friends WHERE user_id = ?";
 
-        if (jdbcTemplate.update(sqlQuery, userId, userId, userId, userId) == 0) {
+        if (jdbcTemplate.update(sqlQuery, userId, userId, userId) == 0) {
             throw new EntityNotFoundException("User not found");
         }
     }
@@ -107,7 +106,15 @@ public class UserDbStorage implements UserStorage {
         try {
             jdbcTemplate.update(sqlQuery, userId, friendId);
         } catch (DataIntegrityViolationException e) {
-            throw new EntityNotFoundException("User(s) not found");
+            if (e.getMessage().contains("CONSTRAINT_BD:")) {
+                throw new EntityNotFoundException("User not found");
+            } else if (e.getMessage().contains("CONSTRAINT_BD6:")) {
+                throw new EntityNotFoundException("User friend not found");
+            } else if (e.getMessage().contains("Unique index or primary key violation")) {
+                throw new IllegalArgumentException("Users are already friends");
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         }
     }
 
@@ -116,7 +123,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "DELETE FROM user_friends WHERE user_id = ? AND friend_id = ?";
 
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
-            throw new EntityNotFoundException("User not found");
+            throw new EntityNotFoundException("User(s) not found");
         }
     }
 
@@ -125,11 +132,8 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "SELECT * FROM users WHERE id IN" +
                 " (SELECT friend_id FROM user_friends WHERE user_id = ? AND friend_id IN" +
                 " (SELECT friend_id FROM user_friends WHERE user_id = ?))";
-        try {
-            return jdbcTemplate.query(sqlQuery, userRowMapper(), user1Id, user2Id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new EntityNotFoundException("User(s) not found");
-        }
+
+        return jdbcTemplate.query(sqlQuery, userRowMapper(), user1Id, user2Id);
     }
 
     private RowMapper<User> userRowMapper() {

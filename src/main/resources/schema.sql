@@ -30,15 +30,18 @@ CREATE TABLE users (
 
 CREATE TABLE film_genres (
 	film_id INTEGER NOT NULL REFERENCES films(id) ON DELETE CASCADE,
-	genre_id SMALLINT REFERENCES genres(id) ON DELETE CASCADE
+	genre_id SMALLINT REFERENCES genres(id) ON DELETE CASCADE,
+	CONSTRAINT unique_film_genre_row_constraint UNIQUE (film_id, genre_id)
 );
 
 CREATE TABLE film_likes (
     film_id INTEGER NOT NULL REFERENCES films(id) ON DELETE CASCADE,
-	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE
+	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	CONSTRAINT unique_film_like_row_constraint UNIQUE (film_id, user_id)
 );
 
 CREATE TABLE user_friends (
 	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	friend_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE
+	friend_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	CONSTRAINT unique_user_friend_row_constraint UNIQUE (user_id, friend_id)
 );

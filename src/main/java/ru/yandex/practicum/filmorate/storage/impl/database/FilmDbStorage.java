@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.impl.database;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -149,8 +150,18 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "INSERT INTO film_likes VALUES (?, ?);" +
                 " UPDATE films SET rate = rate + 1 WHERE id = ?";
 
-        if (jdbcTemplate.update(sqlQuery, filmId, userId, filmId) == 0) {
-            throw new EntityNotFoundException("Film or User not found");
+        try {
+            jdbcTemplate.update(sqlQuery, filmId, userId, filmId);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("CONSTRAINT_7A:")) {
+                throw new EntityNotFoundException("Film not found");
+            } else if (e.getMessage().contains("CONSTRAINT_7A1:")) {
+                throw new EntityNotFoundException("User not found");
+            } else if (e.getMessage().contains("Unique index or primary key violation")) {
+                throw new IllegalArgumentException("Users already likes this Film");
+            } else {
+                throw new RuntimeException(e.getMessage());
+            }
         }
     }
 
