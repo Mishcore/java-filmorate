@@ -41,7 +41,7 @@ public class UserService {
         }
         if (user1Id == user2Id) {
             throw new IllegalArgumentException("Cannot pass a pair of same ids" +
-                    " (Suggest calling getFriends(long id) method instead)");
+                    " (Might want to call getFriends(long id) method instead)");
         }
         return userStorage.getCommonFriends(user1Id, user2Id);
     }

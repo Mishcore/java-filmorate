@@ -170,4 +170,11 @@ public class UserDbStorageTests {
     public void testGetCommonFriends(long userid, long friendId, int size) {
         assertEquals(size, storage.getCommonFriends(userid, friendId).size());
     }
+
+    @ParameterizedTest
+    @CsvSource({"1, 4", "4, 2", "4, 5", "69, 777"})
+    public void shouldThrowEntityNotFoundExceptionWhenGettingCommonFriendsOfUnknownUsers(long userid, long friendId) {
+        assertThrows(EntityNotFoundException.class, () -> storage.getCommonFriends(userid, friendId));
+    }
+
 }
