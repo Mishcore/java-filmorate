@@ -65,20 +65,7 @@ public class FilmDbStorage implements FilmStorage {
 
         String sqlQueryForGenres = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
-        jdbcTemplate.batchUpdate(sqlQueryForGenres, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                List<Genre> genres = new ArrayList<>(film.getGenres());
-                ps.setInt(1, film.getId());
-                ps.setShort(2, genres.get(i).getId());
-            }
-
-            @Override
-            public int getBatchSize() {
-                return film.getGenres().size();
-            }
-        });
-
+        jdbcTemplate.batchUpdate(sqlQueryForGenres, new FilmBatchPreparedStatementSetter(film));
         return film;
     }
 
@@ -105,27 +92,15 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlDeleteGenresQuery, film.getId());
 
         String sqlUpdateGenresQuery = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
-        jdbcTemplate.batchUpdate(sqlUpdateGenresQuery, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                List<Genre> genres = new ArrayList<>(film.getGenres());
-                ps.setInt(1, film.getId());
-                ps.setShort(2, genres.get(i).getId());
-            }
 
-            @Override
-            public int getBatchSize() {
-                return film.getGenres().size();
-            }
-        });
-
+        jdbcTemplate.batchUpdate(sqlUpdateGenresQuery, new FilmBatchPreparedStatementSetter(film));
         return film;
     }
 
     @Override
     public void deleteFilm(int filmId) {
-        String sqlQuery = "DELETE FROM films WHERE id = ?; DELETE FROM film_genres WHERE film_id = ?";
-        if (jdbcTemplate.update(sqlQuery, filmId, filmId) == 0) {
+        String sqlQuery = "DELETE FROM films WHERE id = ?";
+        if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new EntityNotFoundException("Film not found");
         }
     }
@@ -197,6 +172,26 @@ public class FilmDbStorage implements FilmStorage {
             }
             return film;
         };
+    }
+
+    static class FilmBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
+        private final Film film;
+
+        FilmBatchPreparedStatementSetter(Film film) {
+            this.film = film;
+        }
+
+        @Override
+        public void setValues(PreparedStatement ps, int i) throws SQLException {
+            List<Genre> genres = new ArrayList<>(film.getGenres());
+            ps.setInt(1, film.getId());
+            ps.setShort(2, genres.get(i).getId());
+        }
+
+        @Override
+        public int getBatchSize() {
+            return film.getGenres().size();
+        }
     }
 
     private Map<String, Object> filmToMap(Film film) {

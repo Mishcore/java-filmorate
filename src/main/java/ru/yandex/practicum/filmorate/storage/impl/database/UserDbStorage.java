@@ -90,11 +90,9 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteUser(long userId) {
-        String sqlQuery = "DELETE FROM users WHERE id = ?;" +
-                " DELETE FROM film_likes WHERE user_id = ?;" +
-                " DELETE FROM user_friends WHERE user_id = ?";
+        String sqlQuery = "DELETE FROM users WHERE id = ?";
 
-        if (jdbcTemplate.update(sqlQuery, userId, userId, userId) == 0) {
+        if (jdbcTemplate.update(sqlQuery, userId) == 0) {
             throw new EntityNotFoundException("User not found");
         }
     }
