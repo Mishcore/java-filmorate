@@ -29,6 +29,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
+        log.info("Films list requested");
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
                 " FROM films AS f" +
@@ -41,6 +42,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(int id) {
+        log.info("Film requested");
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
                 " FROM films AS f" +
@@ -66,6 +68,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQueryForGenres = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
         jdbcTemplate.batchUpdate(sqlQueryForGenres, new FilmBatchPreparedStatementSetter(film));
+        log.info("Film added");
         return film;
     }
 
@@ -94,6 +97,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlUpdateGenresQuery = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
         jdbcTemplate.batchUpdate(sqlUpdateGenresQuery, new FilmBatchPreparedStatementSetter(film));
+        log.info("Film info updated");
         return film;
     }
 
@@ -103,10 +107,16 @@ public class FilmDbStorage implements FilmStorage {
         if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new EntityNotFoundException("Film not found");
         }
+        log.info("Film deleted");
     }
 
     @Override
     public List<Film> getPopular(int count) {
+        if (count == 1) {
+            log.info("The most popular film requested");
+        } else {
+            log.info(count + " most popular films requested");
+        }
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
                 " FROM films AS f" +
@@ -133,11 +143,12 @@ public class FilmDbStorage implements FilmStorage {
             } else if (e.getMessage().contains("CONSTRAINT_7A1:")) {
                 throw new EntityNotFoundException("User not found");
             } else if (e.getMessage().contains("Unique index or primary key violation")) {
-                throw new IllegalArgumentException("Users already likes this Film");
+                throw new IllegalArgumentException("User already likes this Film");
             } else {
                 throw new RuntimeException(e.getMessage());
             }
         }
+        log.info("Like added");
     }
 
     @Override
@@ -148,6 +159,7 @@ public class FilmDbStorage implements FilmStorage {
         if (jdbcTemplate.update(sqlQuery, filmId, userId, filmId) == 0) {
             throw new EntityNotFoundException("Film or User not found");
         }
+        log.info("Like deleted");
     }
 
     private RowMapper<Film> filmRowMapper() {

@@ -29,14 +29,14 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         String sqlQuery = "SELECT * FROM users GROUP BY id";
-
+        log.info("Users list requested");
         return jdbcTemplate.query(sqlQuery, userRowMapper());
     }
 
     @Override
     public User getUser(long id) {
         String sqlQuery = "SELECT * FROM users WHERE id = ?";
-
+        log.info("User requested");
         try {
             return jdbcTemplate.queryForObject(sqlQuery, userRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
@@ -46,6 +46,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(long id) {
+        log.info("User friends list requested");
         String sqlQuery = "SELECT u.id, u.email, u.login, u.name, u.birthday" +
                 " FROM user_friends AS uf" +
                 " JOIN users AS u ON u.id = uf.friend_id" +
@@ -64,7 +65,7 @@ public class UserDbStorage implements UserStorage {
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
         user.setId(simpleJdbcInsert.executeAndReturnKey(userToMap(user)).longValue());
-
+        log.info("User created");
         return user;
     }
 
@@ -84,7 +85,7 @@ public class UserDbStorage implements UserStorage {
         ) == 0) {
             throw new EntityNotFoundException("User not found");
         }
-
+        log.info("User updated");
         return user;
     }
 
@@ -95,6 +96,7 @@ public class UserDbStorage implements UserStorage {
         if (jdbcTemplate.update(sqlQuery, userId) == 0) {
             throw new EntityNotFoundException("User not found");
         }
+        log.info("User deleted");
     }
 
     @Override
@@ -114,6 +116,7 @@ public class UserDbStorage implements UserStorage {
                 throw new RuntimeException(e.getMessage());
             }
         }
+        log.info("Friend added");
     }
 
     @Override
@@ -123,6 +126,7 @@ public class UserDbStorage implements UserStorage {
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new EntityNotFoundException("User(s) not found");
         }
+        log.info("Friend deleted");
     }
 
     @Override
@@ -130,6 +134,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "SELECT u.* FROM users u" +
                 " JOIN user_friends uf1 ON u.id = uf1.friend_id JOIN user_friends uf2 ON uf1.friend_id = uf2.friend_id" +
                 " WHERE uf1.user_id = ? AND uf2.user_id = ?";
+        log.info("Common friends list requested");
         List<User> commonFriends = jdbcTemplate.query(sqlQuery, userRowMapper(), user1Id, user2Id);
 
         if (commonFriends.isEmpty()) {
