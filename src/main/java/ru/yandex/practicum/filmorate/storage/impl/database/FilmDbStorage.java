@@ -29,7 +29,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        log.info("Films list requested");
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genres_id, GROUP_CONCAT(g.name) AS genres," +
                 " GROUP_CONCAT(fl.user_id) AS likers_id" +
@@ -44,7 +43,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(int id) {
-        log.info("Film requested");
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genres_id, GROUP_CONCAT(g.name) AS genres," +
                 " GROUP_CONCAT(fl.user_id) AS likers_id" +
@@ -101,7 +99,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlUpdateGenresQuery = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
         jdbcTemplate.batchUpdate(sqlUpdateGenresQuery, new FilmBatchPreparedStatementSetter(film));
-        log.info("Film info updated");
+        log.info("Film updated");
         return film;
     }
 
@@ -116,11 +114,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopular(int count) {
-        if (count == 1) {
-            log.info("The most popular film requested");
-        } else {
-            log.info(count + " most popular films requested");
-        }
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
                 " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genres_id, GROUP_CONCAT(g.name) AS genres," +
                 " GROUP_CONCAT(fl.user_id) AS likers_id" +

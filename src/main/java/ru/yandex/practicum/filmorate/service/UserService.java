@@ -15,6 +15,44 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
 
+    public List<User> getAllUsers() {
+        log.info("Users list requested");
+        return userStorage.getAllUsers();
+    }
+
+    public User getUser(long id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
+        log.info("User requested");
+        return userStorage.getUser(id);
+    }
+
+    public List<User> getFriends(long id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
+        log.info("User friends list requested");
+        return userStorage.getFriends(id);
+    }
+
+    public User addUser(User user) {
+        setEmptyNameAsLogin(user);
+        return userStorage.addUser(user);
+    }
+
+    public User updateUser(User user) {
+        setEmptyNameAsLogin(user);
+        return userStorage.updateUser(user);
+    }
+
+    public void deleteUser(long id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid User ID");
+        }
+        userStorage.deleteUser(id);
+    }
+
     public void addFriend(long userId, long friendId) {
         if (userId <= 0 || friendId <= 0) {
             throw new EntityNotFoundException("Invalid User ID");
@@ -43,42 +81,8 @@ public class UserService {
             throw new IllegalArgumentException("Cannot pass a pair of same ids" +
                     " (Might want to call getFriends(long id) method instead)");
         }
+        log.info("Common friends list requested");
         return userStorage.getCommonFriends(user1Id, user2Id);
-    }
-
-    public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
-    }
-
-    public User getUser(long id) {
-        if (id <= 0) {
-            throw new EntityNotFoundException("Invalid User ID");
-        }
-        return userStorage.getUser(id);
-    }
-
-    public List<User> getFriends(long id) {
-        if (id <= 0) {
-            throw new EntityNotFoundException("Invalid User ID");
-        }
-        return userStorage.getFriends(id);
-    }
-
-    public User addUser(User user) {
-        setEmptyNameAsLogin(user);
-        return userStorage.addUser(user);
-    }
-
-    public User updateUser(User user) {
-        setEmptyNameAsLogin(user);
-        return userStorage.updateUser(user);
-    }
-
-    public void deleteUser(long id) {
-        if (id <= 0) {
-            throw new EntityNotFoundException("Invalid User ID");
-        }
-        userStorage.deleteUser(id);
     }
 
     private void setEmptyNameAsLogin(User user) {

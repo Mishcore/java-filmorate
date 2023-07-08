@@ -15,6 +15,34 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
 
+    public List<Film> getAllFilms() {
+        log.info("Films list requested");
+        return filmStorage.getAllFilms();
+    }
+
+    public Film getFilm(int id) {
+        log.info("Film requested");
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid Film ID");
+        }
+        return filmStorage.getFilm(id);
+    }
+
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+
+    public void deleteFilm(int id) {
+        if (id <= 0) {
+            throw new EntityNotFoundException("Invalid Film ID");
+        }
+        filmStorage.deleteFilm(id);
+    }
+
     public void addLike(int filmId, long userId) {
         if (filmId <= 0) {
             throw new EntityNotFoundException("Invalid Film ID");
@@ -36,35 +64,13 @@ public class FilmService {
     }
 
     public List<Film> getPopular(int count) {
-        if (count < 1) {
+        if (count <= 0) {
             throw new IllegalArgumentException("Illegal count value");
+        } else if (count == 1) {
+            log.info("The most popular film requested");
+        } else {
+            log.info(count + " most popular films requested");
         }
         return filmStorage.getPopular(count);
-    }
-
-    public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
-    }
-
-    public Film getFilm(int id) {
-        if (id <= 0) {
-            throw new EntityNotFoundException("Invalid Film ID");
-        }
-        return filmStorage.getFilm(id);
-    }
-
-    public Film addFilm(Film film) {
-        return filmStorage.addFilm(film);
-    }
-
-    public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
-    }
-
-    public void deleteFilm(int id) {
-        if (id <= 0) {
-            throw new EntityNotFoundException("Invalid Film ID");
-        }
-        filmStorage.deleteFilm(id);
     }
 }
