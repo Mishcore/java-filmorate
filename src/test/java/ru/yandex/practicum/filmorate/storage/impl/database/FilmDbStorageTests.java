@@ -175,9 +175,14 @@ public class FilmDbStorageTests {
         userStorage.addUser(new User("test@mail.com", "updated_login", "updated_name", LocalDate.of(2001, 2, 5)));
 
         storage.addLike(filmId, userId);
-        assertEquals(rate + 1, storage.getFilm(filmId).getRate());
+        Film likedFilm = storage.getFilm(filmId);
+        assertEquals(rate + 1, likedFilm.getRate());
+        assertEquals(1, likedFilm.getLikers().size());
+
         storage.deleteLike(filmId, userId);
-        assertEquals(rate, storage.getFilm(filmId).getRate());
+        Film unlikedFilm = storage.getFilm(filmId);
+        assertEquals(rate, unlikedFilm.getRate());
+        assertEquals(0, unlikedFilm.getLikers().size());
     }
 
     @ParameterizedTest

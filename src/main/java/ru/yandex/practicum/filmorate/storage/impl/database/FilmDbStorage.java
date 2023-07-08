@@ -31,11 +31,13 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getAllFilms() {
         log.info("Films list requested");
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
-                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
+                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genres_id, GROUP_CONCAT(g.name) AS genres," +
+                " GROUP_CONCAT(fl.user_id) AS likers_id" +
                 " FROM films AS f" +
                 " JOIN mpa_ratings AS mpa ON f.mpa_rating_id = mpa.id" +
                 " LEFT JOIN film_genres AS fg ON f.id = fg.film_id" +
                 " LEFT JOIN genres AS g ON fg.genre_id = g.id" +
+                " LEFT JOIN film_likes AS fl ON fl.film_id = f.id" +
                 " GROUP BY f.id";
         return jdbcTemplate.query(sqlQuery, filmRowMapper());
     }
@@ -44,11 +46,13 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(int id) {
         log.info("Film requested");
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
-                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
+                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genres_id, GROUP_CONCAT(g.name) AS genres," +
+                " GROUP_CONCAT(fl.user_id) AS likers_id" +
                 " FROM films AS f" +
                 " JOIN mpa_ratings AS mpa ON f.mpa_rating_id = mpa.id" +
                 " LEFT JOIN film_genres AS fg ON f.id = fg.film_id" +
                 " LEFT JOIN genres AS g ON fg.genre_id = g.id" +
+                " LEFT JOIN film_likes AS fl ON fl.film_id = f.id" +
                 " WHERE f.id = ?" +
                 " GROUP BY f.id";
         try {
@@ -118,11 +122,13 @@ public class FilmDbStorage implements FilmStorage {
             log.info(count + " most popular films requested");
         }
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_rating_id," +
-                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genre_id, GROUP_CONCAT(g.name) AS genre" +
+                " mpa.name AS mpa, GROUP_CONCAT(fg.genre_id) AS genres_id, GROUP_CONCAT(g.name) AS genres," +
+                " GROUP_CONCAT(fl.user_id) AS likers_id" +
                 " FROM films AS f" +
                 " JOIN mpa_ratings AS mpa ON f.mpa_rating_id = mpa.id" +
                 " LEFT JOIN film_genres AS fg ON f.id = fg.film_id" +
                 " LEFT JOIN genres AS g ON fg.genre_id = g.id" +
+                " LEFT JOIN film_likes AS fl ON fl.film_id = f.id" +
                 " GROUP BY f.id" +
                 " ORDER BY f.rate DESC" +
                 " LIMIT ?";
@@ -173,13 +179,20 @@ public class FilmDbStorage implements FilmStorage {
                     new MpaRating(rs.getShort("mpa_rating_id"), rs.getString("mpa"))
             );
             film.setId(rs.getInt("id"));
-            if (rs.getString("genre_id") != null) {
-                String[] genreIdsArray = rs.getString("genre_id").split(",");
-                String[] genreNamesArray = rs.getString("genre").split(",");
+            if (rs.getString("genres_id") != null) {
+                String[] genreIdsArray = rs.getString("genres_id").split(",");
+                String[] genreNamesArray = rs.getString("genres").split(",");
                 for (int i = 0; i < genreIdsArray.length; i++) {
                     short genreId = (short) Integer.parseInt(genreIdsArray[i]);
                     String genreName = genreNamesArray[i];
                     film.getGenres().add(new Genre(genreId, genreName));
+                }
+            }
+            if (rs.getString("likers_id") != null) {
+                String[] likersIdsArray = rs.getString("likers_id").split(",");
+                for (String id : likersIdsArray) {
+                    long likerId = Integer.parseInt(id);
+                    film.getLikers().add(likerId);
                 }
             }
             return film;
