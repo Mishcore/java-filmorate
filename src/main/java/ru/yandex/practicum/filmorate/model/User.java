@@ -11,7 +11,7 @@ import java.util.Set;
 public class User {
     private static final String LOGIN_PATTERN = "^\\S+$";
 
-    private int id;
+    private long id;
 
     @NotBlank
     @Email
@@ -27,7 +27,7 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;
 
-    private final Set<Integer> friends;
+    private final Set<Long> friends;
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;

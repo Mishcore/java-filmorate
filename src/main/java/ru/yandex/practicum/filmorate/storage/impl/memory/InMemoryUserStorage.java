@@ -1,9 +1,11 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl.memory;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,24 +15,29 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
 
-    private int id = 0;
-    private final Map<Integer, User> users = new HashMap<>();
+    private long id = 0;
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public List<User> getAllUsers() {
+        log.info("Users list requested");
         return new ArrayList<>(users.values());
     }
 
     @Override
-    public User getUser(int id) {
+    public User getUser(long id) {
         validateUserId(id);
+        log.info("User requested");
         return users.get(id);
     }
 
     @Override
-    public List<User> getFriends(int id) {
+    public List<User> getFriends(long id) {
+        validateUserId(id);
+        log.info("User friends list requested");
         return users.get(id).getFriends().stream()
                 .map(users::get)
                 .collect(Collectors.toList());
@@ -55,10 +62,39 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(int userId) {
+    public void deleteUser(long userId) {
         validateUserId(userId);
         users.remove(userId);
         log.info("User deleted");
+    }
+
+    @Override
+    public void addFriend(long userId, long friendId) {
+        validateUserId(userId);
+        validateUserId(friendId);
+        users.get(userId).getFriends().add(friendId);
+        users.get(friendId).getFriends().add(userId);
+        log.info("Friend added");
+    }
+
+    @Override
+    public void deleteFriend(long userId, long friendId) {
+        validateUserId(userId);
+        validateUserId(friendId);
+        users.get(userId).getFriends().remove(friendId);
+        users.get(friendId).getFriends().remove(userId);
+        log.info("Friend deleted");
+    }
+
+    @Override
+    public List<User> getCommonFriends(long user1Id, long user2Id) {
+        validateUserId(user1Id);
+        validateUserId(user2Id);
+        log.info("Common friends list requested");
+        return users.get(user1Id).getFriends().stream()
+                .filter((user) -> users.get(user2Id).getFriends().contains(user))
+                .map(users::get)
+                .collect(Collectors.toList());
     }
 
     private void setEmptyNameAsLogin(User user) {
@@ -67,13 +103,11 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private void validateUserId(int userId) {
+    private void validateUserId(long userId) {
         if (userId <= 0) {
-            log.warn("Invalid user ID");
             throw new EntityNotFoundException("Invalid user ID");
         }
         if (!users.containsKey(userId)) {
-            log.warn("User not found");
             throw new EntityNotFoundException("User not found");
         }
     }
